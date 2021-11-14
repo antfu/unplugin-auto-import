@@ -5,6 +5,9 @@ import { Options } from './types'
 import { resolveOptions } from './core/options'
 import { transform } from './core/transform'
 import { generateDeclration as _generateDeclaration } from './core/dts'
+import { pickTypes } from './global-types/pickTypes'
+
+export { pickTypes }
 
 export default createUnplugin<Options>((options) => {
   const resolved = resolveOptions(options)
@@ -14,7 +17,16 @@ export default createUnplugin<Options>((options) => {
 
   const generateDeclaration = throttle(500, false, () => {
     if (!resolved.dts) return
-    fs.writeFile(resolved.dts, _generateDeclaration(resolved.imports, resolved.resolvedImports), 'utf-8')
+    fs.writeFile(
+      resolved.dts,
+      _generateDeclaration(
+        resolved.imports,
+        resolved.types,
+        resolved.resolvedImports,
+        resolved.resolvedTypes,
+      ),
+      'utf-8',
+    )
   })
 
   generateDeclaration()

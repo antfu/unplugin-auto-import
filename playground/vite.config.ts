@@ -9,6 +9,7 @@ export default defineConfig({
     Inspect(),
     AutoImport({
       imports: 'vue',
+      types: 'vue',
     }),
   ],
 })

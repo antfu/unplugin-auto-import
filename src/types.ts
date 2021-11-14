@@ -1,12 +1,30 @@
 import { Arrayable } from '@antfu/utils'
 import { FilterPattern } from '@rollup/pluginutils'
 import { PresetName } from './presets'
+import { TypePresetName } from './global-types'
 
+/**
+ * name => alias
+ */
 export type ImportNameAlias = [string, string]
+/**
+ *  name => type parameters:
+ *  - `true`: parametrized type `T`, for example when using `Ref<T>`
+ *  - `custom`: parametrized custom type, for example when using `WatchCallback<V, OV>`, use `O, IV`
+ */
+export type ImportNameTypeAlias = [string, boolean | string]
+/**
+ * Mapping for ImportNameAlias and ImportNameTypeAlias
+ */
 export type ImportInfo = {
   module: string
   name: string
   from?: string
+  /**
+   * Only for types
+   */
+  parameters?: boolean | string
+
 }
 
 /**
@@ -19,6 +37,10 @@ export type Resolver = (name: string) => string | ImportInfo | null | undefined 
  */
 export type ImportsMap = Record<string, (string | ImportNameAlias)[]>
 /**
+ * module, name, type parameters
+ */
+export type ImportsTypeMap = Record<string, (string | ImportNameTypeAlias)[]>
+/**
  * name, meta
  */
 export type ImportsFlatMap = Record<string, ImportInfo>
@@ -30,6 +52,13 @@ export interface Options {
    * @default []
    */
   imports?: Arrayable<ImportsMap | PresetName>
+
+  /**
+   * Preset names or custom imports map
+   *
+   * @default []
+   */
+  types?: Arrayable<ImportsTypeMap | TypePresetName>
 
   /**
    * Identifiers to be ignored
@@ -84,6 +113,8 @@ export interface Options {
 export interface TransformOptions {
   imports: ImportsFlatMap
 
+  types: ImportsFlatMap
+
   /**
    * Identifiers to be ignored
    */
@@ -105,9 +136,14 @@ export interface TransformOptions {
    * Hold the value for dynamic resolved imports, will be mutated during transforming
    */
   resolvedImports?: ImportsFlatMap
+
+  /**
+   * Hold the value for dynamic resolved imports, will be mutated during transforming
+   */
+  resolvedTypes?: ImportsFlatMap
 }
 
-export interface ResolvedOptions extends Omit<Required<Options>, 'imports' | 'resolvers' | 'dts' | 'include' | 'exclude'>, Required<TransformOptions> {
+export interface ResolvedOptions extends Omit<Required<Options>, 'imports' | 'types' | 'resolvers' | 'dts' | 'include' | 'exclude'>, Required<TransformOptions> {
   idFilter: (id: string) => boolean
   dts: string | false
 }
